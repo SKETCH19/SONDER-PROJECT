@@ -113,7 +113,7 @@ $featured_contacts = getFeaturedContacts($_SESSION['user_id']);
                 </div>
                 <div class="menu-item" data-section="profile">
                     <span class="menu-icon">👤</span>
-                    <span>Perfil</span>
+                    <span src = "include/profile.php">Perfil</span>
                 </div>
             </div>
         </div>
