@@ -1,3 +1,7 @@
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,9 +18,19 @@
             <div class="profile-container">
                 <div class="profile-header">
                     <div class="avatar-upload">
-                        <img src="uploads/<?php echo $userInfo['profile_pic']; ?>" alt="Avatar" class="profile-avatar" id="profile-avatar" onerror="this.src='https://placehold.co/100'">
-                        <input type="file" id="avatar-input" accept="image/*" style="display: none;">
-                        <button class="btn btn-secondary" onclick="document.getElementById('avatar-input').click()">Cambiar foto</button>
+                    <img 
+                            id="profile-avatar" 
+                            src="uploads/<?php echo htmlspecialchars($userInfo['profile_pic'] ?: 'default.png'); ?>" 
+                            onerror="this.src='https://placehold.co/150x150?text=Foto'"
+                            alt="Avatar"
+                            style="width:150px; height:150px; border-radius:50%; object-fit:cover;"
+                        >
+
+                        <form id="avatar-form" enctype="multipart/form-data" method="POST" action="upload_avatar.php">
+                            <input type="file" name="avatar" id="avatar-input" accept="image/*" style="opacity:0; position:absolute; z-index:-1;">
+                        </form>
+
+                        <button class="btn btn-secondary" id="change-avatar-btn" style="margin-top:10px;">Cambiar foto</button>
                     </div>
                     <div class="profile-info">
                         <h2 id="profile-display-name"><?php echo htmlspecialchars($userInfo['full_name']); ?></h2>
@@ -128,6 +142,8 @@
             </div>
         </div>
     </div>
+    
+    <script src= "js/profile.js"></script>
 
 </body>
 </html>

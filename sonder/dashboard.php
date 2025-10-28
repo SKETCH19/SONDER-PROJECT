@@ -8,6 +8,8 @@ if (!isLoggedIn()) {
 
 $userInfo = getUserInfo($_SESSION['user_id']);
 
+
+
 // Obtener amigos del usuario
 function getUserFriends($user_id) {
     global $pdo;
@@ -310,7 +312,7 @@ $featured_contacts = getFeaturedContacts($_SESSION['user_id']);
         </div>
         
         <!-- Sección de Perfil -->
-       <?php include 'includes/profile.php'; ?>
+        <?php include 'includes/profile.php';?>
     
     <script src="js/script.js"></script>
 </body>

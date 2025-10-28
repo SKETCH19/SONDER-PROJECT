@@ -1,3 +1,4 @@
+
 // Navegación entre secciones
 function showSection(sectionName) {
     // Ocultar todas las secciones
@@ -182,6 +183,7 @@ function setupImprovedSearch() {
         placeholderIndex = (placeholderIndex + 1) % placeholders.length;
     }, 3000);
 }
+
 
 // Funciones auxiliares para acciones de búsqueda
 function sendFriendRequest(userId) {

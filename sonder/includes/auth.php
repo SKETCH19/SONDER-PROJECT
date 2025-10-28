@@ -74,4 +74,16 @@ function getUserInfo($user_id) {
     $stmt->execute([$user_id]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
+// Actualizar foto de perfil
+function updateProfilePic($user_id, $profile_pic) {
+    global $pdo;
+    
+    $stmt = $pdo->prepare("UPDATE users SET profile_pic = ? WHERE id = ?");
+    return $stmt->execute([$profile_pic, $user_id]);
+}
+
+
+
+
+
 ?>
