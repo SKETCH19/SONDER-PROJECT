@@ -57,11 +57,11 @@ function setupImprovedSearch() {
         if (!searchQuery) {
             resultsContainer.innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-icon">🌌</div>
-                    <h3>Explora el Universo Sonder</h3>
+                    <div class="empty-icon">◈</div>
+                    <h3>Explora la Red Sonder</h3>
                     <p>Busca usuarios para encontrar conexiones increíbles</p>
                     <div class="search-stats">
-                        <p>+5,000 usuarios esperando conocerte</p>
+                        <p>Miles de usuarios esperando conocerte</p>
                     </div>
                 </div>
             `;
@@ -119,7 +119,7 @@ function setupImprovedSearch() {
                                 <span>+</span> Agregar
                             </button>
                             <button class="search-action-btn view-profile-btn">
-                                👁️ Ver
+                                Ver
                             </button>
                         </div>
                     </div>
@@ -191,11 +191,11 @@ function sendFriendRequest(userId) {
     const btn = event.target.closest('.add-friend-btn');
     const originalHTML = btn.innerHTML;
     
-    btn.innerHTML = '<span>⏳</span> Enviando...';
+    btn.innerHTML = '<span>Enviando...</span>';
     btn.disabled = true;
     
     setTimeout(() => {
-        btn.innerHTML = '<span>✓</span> Enviado';
+        btn.innerHTML = '<span>✓ Enviado</span>';
         btn.style.background = 'linear-gradient(45deg, #51cf66, #40c057)';
         
         // Mostrar notificación
@@ -213,7 +213,7 @@ function showNotification(message, type = 'info') {
     notification.className = `notification notification-${type}`;
     notification.innerHTML = `
         <div class="notification-content">
-            <span class="notification-icon">${type === 'success' ? '✓' : 'ℹ️'}</span>
+            <span class="notification-icon">${type === 'success' ? '✓' : '·'}</span>
             <span class="notification-message">${message}</span>
         </div>
     `;
@@ -281,24 +281,159 @@ function setupModals() {
         });
     });
     
-    // Enviar formularios de modales
+    // Cambiar contraseña - AJAX real
     if (passwordForm) {
-        passwordForm.addEventListener('submit', function(e) {
+        passwordForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            alert('Funcionalidad de cambiar contraseña - En desarrollo');
-            passwordModal.style.display = 'none';
+            
+            const currentPassword = this.querySelector('input[name="current_password"]').value;
+            const newPassword = this.querySelector('input[name="new_password"]').value;
+            const confirmPassword = this.querySelector('input[name="confirm_password"]').value;
+            
+            if (newPassword.length < 8) {
+                alert('La contraseña debe tener al menos 8 caracteres');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('current_password', currentPassword);
+            formData.append('new_password', newPassword);
+            formData.append('confirm_password', confirmPassword);
+            
+            try {
+                const response = await fetch('change_password.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Contraseña actualizada correctamente');
+                    passwordForm.reset();
+                    passwordModal.style.display = 'none';
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
         });
     }
     
+    // Eliminar cuenta - AJAX real
     if (deleteForm) {
-        deleteForm.addEventListener('submit', function(e) {
+        deleteForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            if (!confirm('¿ESTÁS ABSOLUTAMENTE SEGURO? Esta acción NO se puede deshacer y perderás todos tus datos.')) {
+                return;
+            }
+            
             const password = this.querySelector('input[name="confirm_password"]').value;
-            if (password) {
-                if (confirm('¿ESTÁS ABSOLUTAMENTE SEGURO? Esta acción no se puede deshacer.')) {
-                    alert('Funcionalidad de eliminar cuenta - En desarrollo');
-                    deleteModal.style.display = 'none';
+            
+            const formData = new FormData();
+            formData.append('confirm_password', password);
+            
+            try {
+                const response = await fetch('delete_account.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Cuenta eliminada. Serás redirigido a la página de inicio.');
+                    window.location.href = data.redirect;
+                } else {
+                    alert('Error: ' + data.error);
                 }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+    }
+    
+    // Cambiar avatar
+    const changeAvatarBtn = document.getElementById('change-avatar-btn');
+    const avatarInput = document.getElementById('avatar-input');
+    const profileAvatar = document.getElementById('profile-avatar');
+    
+    if (changeAvatarBtn) {
+        changeAvatarBtn.addEventListener('click', function() {
+            avatarInput.click();
+        });
+    }
+    
+    if (avatarInput) {
+        avatarInput.addEventListener('change', async function() {
+            if (this.files.length === 0) return;
+            
+            const file = this.files[0];
+            
+            // Validar tamaño
+            if (file.size > 5 * 1024 * 1024) {
+                alert('El archivo es demasiado grande (máximo 5MB)');
+                return;
+            }
+            
+            // Validar tipo
+            if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
+                alert('Solo se aceptan imágenes (JPEG, PNG, GIF, WebP)');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('avatar', file);
+            
+            try {
+                const response = await fetch('upload_avatar.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Actualizar la imagen en la UI
+                    const newImageUrl = 'uploads/' + data.filename + '?t=' + new Date().getTime();
+                    profileAvatar.src = newImageUrl;
+                    alert('Avatar actualizado correctamente');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+    }
+    
+    // Guardar cambios del perfil
+    const profileForm = document.getElementById('profile-form');
+    if (profileForm) {
+        profileForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('update_profile.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Perfil actualizado correctamente');
+                    // Opcional: recargar la página para ver los cambios
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
             }
         });
     }
@@ -312,8 +447,7 @@ function setupFriendActions() {
             e.target.classList.contains('chat-featured')) {
             const friendItem = e.target.closest('.friend-item, .featured-item');
             const userId = friendItem.getAttribute('data-user-id');
-            alert(`Iniciar chat con usuario ${userId} - En desarrollo`);
-            showSection('messages');
+            openChatWithFriend(userId);
         }
         
         // Bloquear amigo
@@ -418,27 +552,34 @@ document.addEventListener('DOMContentLoaded', function() {
     document.head.appendChild(style);
 });
 
-// Función para enviar mensajes
+// Variable para almacenar el amigo actual
+let currentChatFriend = null;
+
+// Función para enviar mensajes (ahora real)
 function sendMessage() {
     const messageInput = document.querySelector('.message-input');
     const message = messageInput.value.trim();
     
-    if (message) {
-        addMessageToChat(message, true);
-        messageInput.value = '';
-        
-        // Simular respuesta después de 1 segundo
-        setTimeout(() => {
-            const responses = [
-                "¡Hola! ¿Cómo estás?",
-                "Interesante, cuéntame más",
-                "Estoy de acuerdo contigo",
-                "¿En qué puedo ayudarte?"
-            ];
-            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-            addMessageToChat(randomResponse, false);
-        }, 1000);
+    if (!message || !currentChatFriend) {
+        return;
     }
+    
+    const formData = new FormData();
+    formData.append('receiver_id', currentChatFriend.id);
+    formData.append('message', message);
+    
+    fetch('send_message.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            messageInput.value = '';
+            loadChatMessages(currentChatFriend.id);
+        }
+    })
+    .catch(error => console.error('Error:', error));
 }
 
 // Función para agregar mensajes al chat
@@ -474,3 +615,115 @@ function addMessageToChat(message, isSent) {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 }
+
+// Cargar mensajes de una conversación
+async function loadChatMessages(friendId) {
+    try {
+        const response = await fetch(`get_messages.php?friend_id=${friendId}`);
+        const data = await response.json();
+        
+        if (!data.success) {
+            console.error('Error al cargar mensajes:', data.error);
+            return;
+        }
+        
+        const messagesContainer = document.querySelector('.messages-container');
+        messagesContainer.innerHTML = '';
+        
+        if (data.messages.length === 0) {
+            messagesContainer.innerHTML = `
+                <div class="welcome-message">
+                    <h3>Inicia una conversación</h3>
+                    <p>Este es el comienzo de tu conversación con ${currentChatFriend.full_name}</p>
+                </div>
+            `;
+        } else {
+            data.messages.forEach(msg => {
+                addMessageToChatUI(msg.message, msg.sender_id, msg.created_at);
+            });
+        }
+        
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+// Agregar mensaje a la UI
+function addMessageToChatUI(message, senderId, createdAt) {
+    const messagesContainer = document.querySelector('.messages-container');
+    
+    const welcomeMessage = messagesContainer.querySelector('.welcome-message');
+    if (welcomeMessage) {
+        welcomeMessage.remove();
+    }
+    
+    const messageElement = document.createElement('div');
+    const currentUserId = parseInt(document.body.getAttribute('data-current-user-id'));
+    const isSent = senderId === currentUserId;
+    
+    messageElement.className = `message ${isSent ? 'sent' : 'received'}`;
+    
+    const date = new Date(createdAt);
+    const timeString = `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+    
+    messageElement.innerHTML = `
+        <div class="message-bubble">
+            <div class="message-text">${message}</div>
+            <div class="message-time">${timeString}</div>
+        </div>
+    `;
+    
+    messagesContainer.appendChild(messageElement);
+}
+
+// Abrir chat con un amigo
+async function openChatWithFriend(friendId) {
+    try {
+        const friendResponse = await fetch(`get_friend_info.php?friend_id=${friendId}`);
+        const friendData = await friendResponse.json();
+        
+        if (!friendData.success) {
+            alert('Error al cargar la información del usuario');
+            return;
+        }
+        
+        currentChatFriend = friendData.friend;
+        
+        const chatHeader = document.querySelector('.chat-header');
+        chatHeader.innerHTML = `
+            <div class="chat-user">
+                <img src="uploads/${currentChatFriend.profile_pic}" 
+                     alt="${currentChatFriend.username}" 
+                     class="chat-user-avatar"
+                     onerror="this.src='https://placehold.co/40'">
+                <div class="chat-user-info">
+                    <h3>${currentChatFriend.full_name}</h3>
+                    <p>@${currentChatFriend.username}</p>
+                </div>
+            </div>
+            <div class="chat-actions"></div>
+        `;
+        
+        loadChatMessages(friendId);
+        showSection('messages');
+        document.querySelector('.message-input-container').style.display = 'flex';
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al abrir el chat');
+    }
+}
+
+// Configurar funcionalidad de chat
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        const friendItems = document.querySelectorAll('.friend-item');
+        friendItems.forEach(item => {
+            item.style.cursor = 'pointer';
+            item.addEventListener('click', function() {
+                const friendId = this.getAttribute('data-user-id');
+                openChatWithFriend(friendId);
+            });
+        });
+    }, 100);
+});

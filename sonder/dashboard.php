@@ -74,13 +74,22 @@ $featured_contacts = getFeaturedContacts($_SESSION['user_id']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sonder - Mensajería</title>
+    <link rel="icon" href="logo.svg" type="image/svg+xml">
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body data-current-user-id="<?php echo $_SESSION['user_id']; ?>">
     <div class="dashboard">
         <!-- Menú lateral -->
         <div class="sidebar">
             <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="logo.svg" alt="Sonder" class="sonder-logo">
+                    <span class="sonder-text">Sonder</span>
+                </div>
+                <button class="menu-toggle">☰</button>
+            </div>
+            
+            <div class="sidebar-user">
                 <div class="user-info">
                     <img src="uploads/<?php echo $userInfo['profile_pic']; ?>" 
                         alt="Avatar" 
@@ -88,31 +97,30 @@ $featured_contacts = getFeaturedContacts($_SESSION['user_id']);
                         onerror="this.src='https://placehold.co/40'">
                     <span class="username"><?php echo htmlspecialchars($userInfo['username']); ?></span>
                 </div>
-                <button class="menu-toggle">☰</button>
             </div>
             
             <div class="sidebar-menu">
                 <div class="menu-item active" data-section="messages">
-                    <span class="menu-icon">💬</span>
+                    <span class="menu-icon">▬</span>
                     <span>Mensajes</span>
                 </div>
                 <div class="menu-item" data-section="friends">
-                    <span class="menu-icon">👥</span>
+                    <span class="menu-icon">◯</span>
                     <span>Amigos</span>
                     <?php if (count($pending_requests) > 0): ?>
                         <span class="notification-badge"><?php echo count($pending_requests); ?></span>
                     <?php endif; ?>
                 </div>
                 <div class="menu-item" data-section="search">
-                    <span class="menu-icon">🔍</span>
+                    <span class="menu-icon">◍</span>
                     <span>Buscar amigos</span>
                 </div>
                 <div class="menu-item" data-section="featured">
-                    <span class="menu-icon">⭐</span>
+                    <span class="menu-icon">★</span>
                     <span>Destacados</span>
                 </div>
                 <div class="menu-item" data-section="profile">
-                    <span class="menu-icon">👤</span>
+                    <span class="menu-icon">◆</span>
                     <span src = "include/profile.php">Perfil</span>
                 </div>
             </div>
@@ -122,20 +130,20 @@ $featured_contacts = getFeaturedContacts($_SESSION['user_id']);
         <div class="chat-area" id="messages-section">
             <div class="chat-header">
                 <div class="chat-user">
-                    <img src="https://placehold.co/45" alt="Usuario" class="chat-user-avatar">
+                    <img src="logo.svg" alt="Sonder" class="chat-user-avatar">
                     <div class="chat-user-info">
                         <h3>Bienvenido a Sonder</h3>
                         <p>Selecciona una conversación</p>
                     </div>
                 </div>
                 <div class="chat-actions">
-                    <button title="Nuevo chat" id="new-chat-btn">✚</button>
                 </div>
             </div>
             
             <div class="messages-container">
                 <div class="welcome-message">
-                    <h3>💫 Bienvenido a Sonder</h3>
+                    <div class="welcome-logo"><img src="logo.svg" alt="Sonder"></div>
+                    <h3>Bienvenido a Sonder</h3>
                     <p>Tu espacio para conexiones significativas</p>
                     <p>Selecciona un chat de la lista o inicia una nueva conversación</p>
                 </div>
@@ -143,14 +151,14 @@ $featured_contacts = getFeaturedContacts($_SESSION['user_id']);
             
             <div class="message-input-container" style="display: none;">
                 <input type="text" class="message-input" placeholder="Escribe un mensaje...">
-                <button class="send-button">➤</button>
+                <button class="send-button">Enviar</button>
             </div>
         </div>
         
         <!-- Sección de Amigos -->
         <div class="content-area" id="friends-section" style="display: none;">
             <div class="section-header">
-                <h2>👥 Mis Amigos</h2>
+                <h2>Mis Amigos</h2>
                 <div class="section-tabs">
                     <button class="tab-btn active" data-tab="friends-list">Amigos</button>
                     <button class="tab-btn" data-tab="pending-requests">Solicitudes 
@@ -173,16 +181,16 @@ $featured_contacts = getFeaturedContacts($_SESSION['user_id']);
                                     <div class="friend-username">@<?php echo htmlspecialchars($friend['username']); ?></div>
                                 </div>
                                 <div class="friend-actions">
-                                    <button class="friend-action chat-with-friend" title="Chatear">💬</button>
-                                    <button class="friend-action block-friend" title="Bloquear">🚫</button>
-                                    <button class="friend-action remove-friend" title="Eliminar">🗑️</button>
+                                    <button class="friend-action chat-with-friend" title="Chatear">Chat</button>
+                                    <button class="friend-action block-friend" title="Bloquear">Bloquear</button>
+                                    <button class="friend-action remove-friend" title="Eliminar">Eliminar</button>
                                 </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
                 <?php else: ?>
                     <div class="empty-state">
-                        <div class="empty-icon">👥</div>
+                        <div class="empty-icon">≈</div>
                         <h3>Aún no tienes amigos</h3>
                         <p>Busca usuarios y envíales solicitudes para comenzar a chatear</p>
                         <button class="btn btn-primary" onclick="showSection('search')">Buscar amigos</button>
@@ -210,7 +218,7 @@ $featured_contacts = getFeaturedContacts($_SESSION['user_id']);
                     </div>
                 <?php else: ?>
                     <div class="empty-state">
-                        <div class="empty-icon">📨</div>
+                        <div class="empty-icon">✓</div>
                         <h3>No hay solicitudes pendientes</h3>
                         <p>Las solicitudes de amistad aparecerán aquí</p>
                     </div>
@@ -235,7 +243,7 @@ $featured_contacts = getFeaturedContacts($_SESSION['user_id']);
                     </div>
                 <?php else: ?>
                     <div class="empty-state">
-                        <div class="empty-icon">🚫</div>
+                        <div class="empty-icon">−</div>
                         <h3>No hay usuarios bloqueados</h3>
                         <p>Los usuarios que bloquees aparecerán aquí</p>
                     </div>
@@ -246,33 +254,33 @@ $featured_contacts = getFeaturedContacts($_SESSION['user_id']);
          <!-- Sección de Búsqueda -->
 <div class="content-area search-section" id="search-section" style="display: none;">
     <div class="search-hero">
-        <h2>🔍 Conecta con el Universo Sonder</h2>
+        <h2>Conecta con Sonder</h2>
         <p>Descubre personas extraordinarias y expande tu red de conexiones</p>
         
         <div class="search-container-improved">
             <input type="text" class="search-input-improved" id="user-search-improved" 
                    placeholder="Buscar por usuario, nombre o intereses...">
             <button class="search-btn-improved" id="search-btn-improved">
-                <span>🚀 Buscar</span>
+                <span>Buscar</span>
             </button>
         </div>
         
         <div class="search-suggestions">
-            <div class="suggestion-tag" data-search="developers">💻 Developers</div>
-            <div class="suggestion-tag" data-search="designers">🎨 Designers</div>
-            <div class="suggestion-tag" data-search="gamers">🎮 Gamers</div>
-            <div class="suggestion-tag" data-search="music">🎵 Música</div>
-            <div class="suggestion-tag" data-search="travel">✈️ Viajes</div>
+            <div class="suggestion-tag" data-search="developers">Developers</div>
+            <div class="suggestion-tag" data-search="designers">Designers</div>
+            <div class="suggestion-tag" data-search="gamers">Gamers</div>
+            <div class="suggestion-tag" data-search="music">Música</div>
+            <div class="suggestion-tag" data-search="travel">Viajes</div>
         </div>
     </div>
     
     <div class="search-results-improved" id="search-results-improved">
         <div class="empty-state">
-            <div class="empty-icon">🌌</div>
-            <h3>Explora el Universo Sonder</h3>
+            <div class="empty-icon">◈</div>
+            <h3>Explora la Red Sonder</h3>
             <p>Busca usuarios para encontrar conexiones increíbles</p>
             <div class="search-stats">
-                <p>+5,000 usuarios esperando conocerte</p>
+                <p>Miles de usuarios esperando conocerte</p>
             </div>
         </div>
     </div>
@@ -281,29 +289,29 @@ $featured_contacts = getFeaturedContacts($_SESSION['user_id']);
         <!-- Sección de Destacados -->
         <div class="content-area" id="featured-section" style="display: none;">
             <div class="section-header">
-                <h2>⭐ Contactos Destacados</h2>
+                <h2>Contactos Destacados</h2>
             </div>
             
             <?php if (count($featured_contacts) > 0): ?>
                 <div class="featured-list">
                     <?php foreach ($featured_contacts as $featured): ?>
                         <div class="featured-item" data-user-id="<?php echo $featured['id']; ?>">
-                            <div class="featured-badge">⭐</div>
+                            <div class="featured-badge">★</div>
                             <img src="uploads/<?php echo $featured['profile_pic']; ?>" alt="<?php echo htmlspecialchars($featured['username']); ?>" class="featured-avatar" onerror="this.src='https://placehold.co/60'">
                             <div class="featured-info">
                                 <div class="featured-name"><?php echo htmlspecialchars($featured['full_name']); ?></div>
                                 <div class="featured-username">@<?php echo htmlspecialchars($featured['username']); ?></div>
                             </div>
                             <div class="featured-actions">
-                                <button class="featured-action chat-featured" title="Chatear">💬</button>
-                                <button class="featured-action remove-featured" title="Quitar de destacados">⭐</button>
+                                <button class="featured-action chat-featured" title="Chatear">Chat</button>
+                                <button class="featured-action remove-featured" title="Quitar de destacados">Quitar</button>
                             </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
             <?php else: ?>
                 <div class="empty-state">
-                    <div class="empty-icon">⭐</div>
+                    <div class="empty-icon">★</div>
                     <h3>No hay contactos destacados</h3>
                     <p>Agrega contactos a destacados para verlos aquí</p>
                     <button class="btn btn-primary" onclick="showSection('friends')">Ver amigos</button>

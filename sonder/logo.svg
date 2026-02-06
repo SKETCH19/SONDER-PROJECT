@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <style>
+      .logo-circle { fill: none; stroke: url(#gradient1); stroke-width: 2; }
+      .logo-center { fill: url(#gradient2); }
+      .logo-dot { fill: #00d4ff; }
+      .logo-line { stroke: #00a8ff; stroke-width: 1.5; stroke-linecap: round; }
+    </style>
+    <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00a8ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#9c27b0;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="gradient2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00a8ff;stop-opacity:0.8" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Círculos externos -->
+  <circle class="logo-circle" cx="100" cy="100" r="95" opacity="0.6"/>
+  <circle class="logo-circle" cx="100" cy="100" r="80" opacity="0.4"/>
+  
+  <!-- Puntos de conexión -->
+  <circle class="logo-dot" cx="100" cy="30" r="4" opacity="0.8"/>
+  <circle class="logo-dot" cx="155" cy="65" r="4" opacity="0.8"/>
+  <circle class="logo-dot" cx="170" cy="135" r="4" opacity="0.8"/>
+  <circle class="logo-dot" cx="100" cy="170" r="4" opacity="0.8"/>
+  <circle class="logo-dot" cx="30" cy="135" r="4" opacity="0.8"/>
+  <circle class="logo-dot" cx="45" cy="65" r="4" opacity="0.8"/>
+  
+  <!-- Líneas de conexión (red) -->
+  <line class="logo-line" x1="100" y1="30" x2="155" y2="65"/>
+  <line class="logo-line" x1="155" y1="65" x2="170" y2="135"/>
+  <line class="logo-line" x1="170" y1="135" x2="100" y2="170"/>
+  <line class="logo-line" x1="100" y1="170" x2="30" y2="135"/>
+  <line class="logo-line" x1="30" y1="135" x2="45" y2="65"/>
+  <line class="logo-line" x1="45" y1="65" x2="100" y2="30"/>
+  
+  <!-- Centro - símbolo de conexión humana -->
+  <circle class="logo-center" cx="100" cy="100" r="18"/>
+  <circle cx="100" cy="100" r="18" fill="none" stroke="url(#gradient1)" stroke-width="1.5" opacity="0.6"/>
+  
+  <!-- Puntos pequeños dentro del centro -->
+  <circle cx="95" cy="97" r="2" fill="#0a0a1a"/>
+  <circle cx="105" cy="97" r="2" fill="#0a0a1a"/>
+  <circle cx="100" cy="105" r="2" fill="#0a0a1a"/>
+</svg>

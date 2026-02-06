@@ -20,12 +20,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - Sonder</title>
+    <link rel="icon" href="logo.svg" type="image/svg+xml">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="welcome-page">
     <div class="stars"></div>
     <div class="form-container">
-        <h1 class="form-title">Iniciar Sesión</h1>
+        <div class="form-logo-container">
+            <img src="logo.svg" alt="Sonder" class="form-logo">
+            <h1 class="form-title">Sonder</h1>
+        </div>
+        
+        <h2 style="text-align: center; color: var(--stardust); margin-bottom: 1.5rem; font-size: 1.2rem; opacity: 0.8;">Iniciar Sesión</h2>
         
         <?php if (isset($error)): ?>
             <div class="error-message" style="color: #ff6b6b; margin-bottom: 1rem; text-align: center;">
