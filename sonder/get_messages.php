@@ -31,7 +31,7 @@ if ($user_id === $friend_id) {
 // Verificar que el usuario amigo existe
 $stmt = $pdo->prepare("SELECT id FROM users WHERE id = ? AND is_active = 1");
 $stmt->execute([$friend_id]);
-if ($stmt->rowCount() === 0) {
+if ($stmt->fetchColumn() === false) {
     http_response_code(404);
     echo json_encode(['error' => 'El usuario no existe']);
     exit;

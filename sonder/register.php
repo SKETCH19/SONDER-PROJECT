@@ -5,7 +5,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Procesar registro
     $userData = [
         'full_name' => $_POST['full_name'] ?? '',
-        'username' => $_POST['username'] ?? '',
         'email' => $_POST['email'] ?? '',
         'password' => $_POST['password'] ?? '',
         'birth_date' => $_POST['birth_date'] ?? '',
@@ -18,9 +17,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($result['success']) {
         // Iniciar sesión automáticamente
         $_SESSION['user_id'] = $result['user_id'];
-        $_SESSION['username'] = $userData['username'];
+        $_SESSION['username'] = $result['username'] ?? '';
+        $_SESSION['profile_completed'] = 0;
         logAction('REGISTER_SUCCESS', 'Nuevo usuario registrado');
-        header('Location: dashboard.php');
+        header('Location: complete_profile.php');
         exit;
     } else {
         $error = $result['message'];
@@ -124,12 +124,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             
             <div class="form-group">
-                <label class="form-label">Nombre de usuario</label>
-                <input type="text" name="username" class="form-input" required minlength="3" maxlength="20" pattern="[a-zA-Z0-9_]+">
-                <span class="form-help">3-20 caracteres (letras, números, guión bajo)</span>
-            </div>
-            
-            <div class="form-group">
                 <label class="form-label">Contraseña</label>
                 <input type="password" name="password" class="form-input" required minlength="8">
                 <span class="form-help">Mínimo 8 caracteres con números y caracteres especiales</span>
@@ -138,20 +132,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit" class="btn btn-primary" style="width: 100%;">Registrarse</button>
         </form>
         
+        <?php if (GOOGLE_AUTH_ENABLED): ?>
         <div style="text-align: center; margin: 1.5rem 0;">
             <p style="opacity: 0.7; margin-bottom: 0.8rem;">O regístrate con</p>
             <div id="g_id_onload"
-                 data-client_id="217692443393-3js9oadjainj1lbdcq8psp9ie0ss41fl.apps.googleusercontent.com"
+                 data-client_id="<?php echo htmlspecialchars(GOOGLE_CLIENT_ID, ENT_QUOTES, 'UTF-8'); ?>"
                  data-callback="handleCredentialResponse">
             </div>
             <div class="g_id_signin" data-type="standard" data-size="large" data-theme="dark" data-text="signup" data-shape="rectangular" data-logo_alignment="left" style="display: flex; justify-content: center;"></div>
         </div>
+        <?php endif; ?>
         <p style="text-align: center; margin-top: 1rem;">
             ¿Ya tienes cuenta? <a href="login.php" style="color: var(--electric-blue);">Inicia sesión</a>
         </p>
     </div>
     
+    <?php if (GOOGLE_AUTH_ENABLED): ?>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <?php endif; ?>
+    <script src="js/countries.js"></script>
     <script src="js/script.js"></script>
     <script>
         function handleCredentialResponse(response) {
@@ -169,8 +168,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Redirigir al dashboard
-                    window.location.href = 'dashboard.php';
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else {
+                        window.location.href = 'dashboard.php';
+                    }
                 } else {
                     // Mostrar error
                     alert(data.message || 'Error en la autenticación con Google');
@@ -184,81 +186,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Configurar Google Sign-In
         window.onload = function () {
-            google.accounts.id.initialize({
-                client_id: '217692443393-3js9oadjainj1lbdcq8psp9ie0ss41fl.apps.googleusercontent.com',
-                callback: handleCredentialResponse
-            });
-            google.accounts.id.renderButton(
-                document.querySelector('.g_id_signin'),
-                { theme: 'outline', size: 'large' }
-            );
+            if (typeof google !== 'undefined') {
+                google.accounts.id.initialize({
+                    client_id: '<?php echo htmlspecialchars(GOOGLE_CLIENT_ID, ENT_QUOTES, 'UTF-8'); ?>',
+                    callback: handleCredentialResponse
+                });
+                google.accounts.id.renderButton(
+                    document.querySelector('.g_id_signin'),
+                    { theme: 'outline', size: 'large' }
+                );
+            }
         
-        // Lista completa de países del mundo
-        const countriesList = [
-            'Afganistán', 'Albania', 'Alemania', 'Andorra', 'Angola', 'Anguila', 'Antártida', 'Antigua y Barbuda',
-            'Arabia Saudí', 'Argelia', 'Argentina', 'Armenia', 'Aruba', 'Australia', 'Austria', 'Azerbaiyán',
-            'Bahamas', 'Bahrein', 'Bangladesh', 'Barbados', 'Bélgica', 'Belice', 'Benin', 'Bermudas', 'Bielorrusia',
-            'Birmania', 'Bolivia', 'Bosnia y Herzegovina', 'Botsuana', 'Brasil', 'Brunei', 'Bulgaria', 'Burkina Faso',
-            'Burundi', 'Bután', 'Cabo Verde', 'Camboya', 'Camerún', 'Canadá', 'Catar', 'Chad', 'Chile', 'China',
-            'Chipre', 'Ciudad del Vaticano', 'Colombia', 'Comoras', 'Congo', 'Corea del Norte', 'Corea del Sur',
-            'Costa de Marfil', 'Costa Rica', 'Croacia', 'Cuba', 'Curazao', 'Dinamarca', 'Dominica', 'Djibutí',
-            'Ecuador', 'Egipto', 'El Salvador', 'Emiratos Árabes Unidos', 'España', 'Estados Unidos', 'Estonia',
-            'Etiopía', 'Filipinas', 'Finlandia', 'Fiyi', 'Francia', 'Gabón', 'Gambia', 'Gana', 'Georgia',
-            'Gibraltar', 'Grecia', 'Groenlandia', 'Guadalupe', 'Guam', 'Guatemala', 'Guayana Francesa', 'Guyana',
-            'Haití', 'Holanda', 'Honduras', 'Hong Kong', 'Hungría', 'India', 'Indonesia', 'Irak', 'Irán',
-            'Irlanda', 'Irlanda del Norte', 'Isla de Man', 'Islandia', 'Islas Åland', 'Islas Ascensión',
-            'Islas Caimán', 'Islas Canarias', 'Islas Cocos', 'Islas Cook', 'Islas Feroe', 'Islas Hébridas',
-            'Islas Malvinas', 'Islas Marianas', 'Islas Norfolk', 'Islas Palau', 'Islas Pitcairn', 'Islas Salomón',
-            'Islas Seychelles', 'Islas Turks y Caicos', 'Islas Vírgenes Británicas', 'Islas Vírgenes de EE. UU.',
-            'Italia', 'Jamaica', 'Japón', 'Jersey', 'Jordania', 'Kazajistán', 'Kenia', 'Kirguistán', 'Kiribati',
-            'Kuwait', 'Laos', 'Lesoto', 'Letonia', 'Líbano', 'Liberia', 'Libia', 'Liechtenstein', 'Lituania',
-            'Luxemburgo', 'Macao', 'Macedonia del Norte', 'Madagascar', 'Malasia', 'Malawi', 'Maldivas', 'Mali',
-            'Malta', 'Marruecos', 'Martinica', 'Mauricio', 'Mauritania', 'Mayotte', 'México', 'Micronesia',
-            'Moldavia', 'Mónaco', 'Mongolia', 'Montenegro', 'Montserrat', 'Mozambique', 'Namibia', 'Nauru',
-            'Nepal', 'Nicaragua', 'Níger', 'Nigeria', 'Niue', 'Noruega', 'Nueva Caledonia', 'Nueva Zelanda',
-            'Omán', 'Países Bajos', 'Panamá', 'Papúa Nueva Guinea', 'Paquistán', 'Paraguay', 'Perú',
-            'Polinesia Francesa', 'Polonia', 'Puerto Rico', 'Qatar', 'República Centroafricana', 'República Checa',
-            'República Democrática del Congo', 'República Dominicana', 'Reunión', 'Ruanda', 'Rumania', 'Rusia',
-            'Saba', 'Sahara Occidental', 'Samoa', 'Samoa Americana', 'San Bartolomé', 'San Cristóbal y Nieves',
-            'San Eustaquio', 'San Marino', 'San Martín', 'San Pedro y Miquelón', 'San Vicente y las Granadinas',
-            'Santa Elena', 'Santa Lucía', 'Santo Tomé y Príncipe', 'Senegal', 'Serbia', 'Seychelles',
-            'Sierra Leona', 'Singapur', 'Sint Maarten', 'Siria', 'Somalia', 'Sri Lanka', 'Suazilandia',
-            'Sudáfrica', 'Sudán', 'Sudán del Sur', 'Suecia', 'Suiza', 'Surinam', 'Svalbard y Jan Mayen',
-            'Tailandia', 'Taiwán', 'Tanzania', 'Tayikistán', 'Territorio Británico del Océano Índico',
-            'Terranova y Labrador', 'Territorios Franceses del Sur', 'Timor Oriental', 'Togo', 'Tokelau',
-            'Tonga', 'Trinidad y Tobago', 'Túnez', 'Turkmenistán', 'Turquía', 'Turks y Caicos', 'Tuvalu',
-            'Ucrania', 'Uganda', 'Uruguay', 'Uzbekistán', 'Vanuatu', 'Venezuela', 'Vietnam', 'Wallis y Futuna',
-            'Yemen', 'Zambia', 'Zimbabue'
-        ];
+        const countriesList = window.SONDER_COUNTRIES || [];
 
-        // Cargar países cuando se cargue la página
-        document.addEventListener('DOMContentLoaded', function() {
+        function initRegisterForm() {
             const countrySelect = document.getElementById('country-select');
             const form = document.getElementById('register-form');
             const birthDateInput = document.getElementById('birth_date');
-            
-            // Limpiar la opción de carga
+
+            if (!countrySelect || !form || !birthDateInput) {
+                return;
+            }
+
             countrySelect.innerHTML = '<option value="">Selecciona tu país</option>';
-            
-            // Agregar todos los países ordenados alfabéticamente
+
             countriesList.sort().forEach(country => {
                 const option = document.createElement('option');
                 option.value = country;
                 option.textContent = country;
                 countrySelect.appendChild(option);
             });
-            
-            // Validar edad mínima
+
             birthDateInput.addEventListener('change', function() {
                 const birthDate = new Date(this.value);
                 const today = new Date();
-                const age = today.getFullYear() - birthDate.getFullYear();
+                let age = today.getFullYear() - birthDate.getFullYear();
                 const monthDiff = today.getMonth() - birthDate.getMonth();
-                
+
                 if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
                     age--;
                 }
-                
+
                 if (age < 18) {
                     this.classList.add('field-error');
                     this.setCustomValidity('Debes ser mayor de 18 años');
@@ -267,25 +235,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     this.setCustomValidity('');
                 }
             });
-            
-            // Validar edad al enviar formulario
+
             form.addEventListener('submit', function(e) {
                 const birthDate = new Date(birthDateInput.value);
                 const today = new Date();
                 let age = today.getFullYear() - birthDate.getFullYear();
                 const monthDiff = today.getMonth() - birthDate.getMonth();
-                
+
                 if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
                     age--;
                 }
-                
+
                 if (age < 18) {
                     e.preventDefault();
                     birthDateInput.classList.add('field-error');
                     alert('Debes ser mayor de 18 años para registrarte en Sonder.');
                 }
             });
-        });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initRegisterForm);
+        } else {
+            initRegisterForm();
+        }
     };
     </script>
 </body>

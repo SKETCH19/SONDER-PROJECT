@@ -1,5 +1,6 @@
 <?php
 include 'includes/auth.php';
+include 'includes/countries.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -70,13 +71,10 @@ if (!empty($phone) && !preg_match('/^[0-9\-\+\(\)\s]{7,20}$/', $phone)) {
     exit;
 }
 
-// Validar que el país sea válido (lista básica)
-$valid_countries = ['Mexico', 'España', 'Argentina', 'Colombia', 'Perú', 'Chile', 
-                   'Ecuador', 'Bolivia', 'Venezuela', 'Uruguay', 'Paraguay', 'Costa Rica',
-                   'Guatemala', 'Panama', 'El Salvador', 'Honduras', 'Nicaragua', 'Cuba',
-                   'Republica Dominicana'];
+// Validar que el país sea válido (lista completa)
+$valid_countries = getValidCountries();
 
-if (!in_array($country, $valid_countries)) {
+if (!in_array($country, $valid_countries, true)) {
     http_response_code(400);
     echo json_encode(['error' => 'País no válido']);
     exit;
@@ -86,7 +84,7 @@ try {
     // Verificar si el username ya existe (excepto el del usuario actual)
     $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? AND id != ?");
     $stmt->execute([$username, $user_id]);
-    if ($stmt->rowCount() > 0) {
+    if ($stmt->fetchColumn() !== false) {
         http_response_code(400);
         echo json_encode(['error' => 'El nombre de usuario ya está en uso']);
         exit;
@@ -95,7 +93,7 @@ try {
     // Verificar si el email ya existe (excepto el del usuario actual)
     $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
     $stmt->execute([$email, $user_id]);
-    if ($stmt->rowCount() > 0) {
+    if ($stmt->fetchColumn() !== false) {
         http_response_code(400);
         echo json_encode(['error' => 'El email ya está en uso']);
         exit;

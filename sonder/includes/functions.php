@@ -1,5 +1,5 @@
 <?php
-include 'config.php';
+require_once __DIR__ . '/config.php';
 
 // Buscar usuarios por username
 function searchUsers($query, $current_user_id) {
@@ -38,7 +38,7 @@ function sendFriendRequest($user_id, $friend_id) {
     // Verificar que el usuario amigo exista y esté activo
     $stmt = $pdo->prepare("SELECT id FROM users WHERE id = ? AND is_active = 1");
     $stmt->execute([$friend_id]);
-    if ($stmt->rowCount() === 0) {
+    if ($stmt->fetchColumn() === false) {
         return ['success' => false, 'message' => 'El usuario no existe'];
     }
     
@@ -82,8 +82,7 @@ function acceptFriendRequest($user_id, $friend_id) {
         WHERE user_id = ? AND friend_id = ? AND status = 'pending'
     ");
     $stmt->execute([$friend_id, $user_id]);
-    
-    if ($stmt->rowCount() === 0) {
+    if ($stmt->fetchColumn() === false) {
         return false;
     }
     
@@ -111,8 +110,7 @@ function rejectFriendRequest($user_id, $friend_id) {
         WHERE user_id = ? AND friend_id = ? AND status = 'pending'
     ");
     $stmt->execute([$friend_id, $user_id]);
-    
-    if ($stmt->rowCount() === 0) {
+    if ($stmt->fetchColumn() === false) {
         return false;
     }
     
@@ -142,7 +140,7 @@ function blockUser($user_id, $blocked_id) {
     // Verificar que el usuario exista
     $stmt = $pdo->prepare("SELECT id FROM users WHERE id = ? AND is_active = 1");
     $stmt->execute([$blocked_id]);
-    if ($stmt->rowCount() === 0) {
+        if ($stmt->fetchColumn() === false) {
         return false;
     }
     
@@ -150,8 +148,7 @@ function blockUser($user_id, $blocked_id) {
         // Primero verificar si ya existe una relación
         $stmt = $pdo->prepare("SELECT id FROM friends WHERE user_id = ? AND friend_id = ?");
         $stmt->execute([$user_id, $blocked_id]);
-        
-        if ($stmt->rowCount() > 0) {
+        if ($stmt->fetchColumn() !== false) {
             // Actualizar existente
             $stmt = $pdo->prepare("UPDATE friends SET status = 'blocked' WHERE user_id = ? AND friend_id = ?");
         } else {
@@ -199,8 +196,7 @@ function areFriends($user_id, $friend_id) {
         AND status = 'accepted'
     ");
     $stmt->execute([$user_id, $friend_id, $friend_id, $user_id]);
-    
-    return $stmt->rowCount() > 0;
+    return $stmt->fetchColumn() !== false;
 }
 
 // Verificar si usuario está bloqueado
@@ -212,8 +208,7 @@ function isUserBlocked($user_id, $blocked_by_id) {
         WHERE user_id = ? AND friend_id = ? AND status = 'blocked'
     ");
     $stmt->execute([$blocked_by_id, $user_id]);
-    
-    return $stmt->rowCount() > 0;
+    return $stmt->fetchColumn() !== false;
 }
 
 // Obtener estado de amistad

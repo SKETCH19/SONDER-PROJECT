@@ -478,13 +478,33 @@ function setupFriendActions() {
         if (e.target.classList.contains('accept-request')) {
             const requestItem = e.target.closest('.request-item');
             const userId = requestItem.getAttribute('data-user-id');
-            alert(`Solicitud de ${userId} aceptada - En desarrollo`);
+            const form = new FormData();
+            form.append('friend_id', userId);
+            fetch('accept_friend_request.php', { method: 'POST', body: form, credentials: 'same-origin' })
+                .then(r => r.json())
+                .then(res => {
+                    showNotification(res.message || (res.success ? 'Solicitud aceptada' : 'Error'), res.success ? 'success' : 'info');
+                    if (res.success) {
+                        requestItem.remove();
+                    }
+                })
+                .catch(() => showNotification('Error al aceptar solicitud', 'info'));
         }
         
         if (e.target.classList.contains('decline-request')) {
             const requestItem = e.target.closest('.request-item');
             const userId = requestItem.getAttribute('data-user-id');
-            alert(`Solicitud de ${userId} rechazada - En desarrollo`);
+            const form = new FormData();
+            form.append('friend_id', userId);
+            fetch('reject_friend_request.php', { method: 'POST', body: form, credentials: 'same-origin' })
+                .then(r => r.json())
+                .then(res => {
+                    showNotification(res.message || (res.success ? 'Solicitud rechazada' : 'Error'), res.success ? 'success' : 'info');
+                    if (res.success) {
+                        requestItem.remove();
+                    }
+                })
+                .catch(() => showNotification('Error al rechazar solicitud', 'info'));
         }
         
         // Desbloquear usuario

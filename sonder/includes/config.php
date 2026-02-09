@@ -9,6 +9,8 @@ define('DB_PATH', __DIR__ . '/../sonder.db');
 define('MAX_LOGIN_ATTEMPTS', 5);
 define('LOGIN_ATTEMPT_WINDOW', 900); // 15 minutos
 define('MIN_AGE', 18); 
+define('GOOGLE_CLIENT_ID', getenv('GOOGLE_CLIENT_ID') ?: '217692443393-3js9oadjainj1lbdcq8psp9ie0ss41fl.apps.googleusercontent.com');
+define('GOOGLE_AUTH_ENABLED', getenv('GOOGLE_AUTH_ENABLED') !== '0');
 
 // Iniciar sesión con configuración segura
 if (session_status() === PHP_SESSION_NONE) {
@@ -19,12 +21,45 @@ if (session_status() === PHP_SESSION_NONE) {
     ]);
     session_start();
 }
-//conexion a la base de datos MySQL
+// Conexion a la base de datos (MySQL por defecto, SQLite como respaldo)
+$pdo = null;
+$pdoDriver = null;
+$pdoErrors = [];
+
 try {
     $pdo = new PDO("mysql:host=localhost;dbname=sonder_db;charset=utf8mb4", "root", "");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    $pdoDriver = 'mysql';
+} catch(PDOException $e) {
+    $pdoErrors[] = $e->getMessage();
+}
 
+if ($pdo === null) {
+    try {
+        $pdo = new PDO("sqlite:" . DB_PATH);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        $pdo->exec("PRAGMA foreign_keys = ON");
+        $pdo->exec("PRAGMA busy_timeout = 5000");
+        $pdoDriver = 'sqlite';
+    } catch(PDOException $e) {
+        $pdoErrors[] = $e->getMessage();
+    }
+}
+
+if ($pdo === null) {
+    if (PHP_SAPI === 'cli') {
+        echo "ERROR: No se pudo conectar a la base de datos.\n";
+    } else {
+        http_response_code(500);
+        header('Content-Type: application/json');
+        echo json_encode(['error' => 'Error de conexión a la base de datos']);
+    }
+    exit;
+}
+
+if ($pdoDriver === 'mysql') {
     $tables = [
         "CREATE TABLE IF NOT EXISTS users (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -37,6 +72,7 @@ try {
             phone TEXT NOT NULL,
             profile_pic TEXT DEFAULT 'default.png',
             is_active INT DEFAULT 1,
+            profile_completed TINYINT(1) DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         )",
@@ -73,50 +109,7 @@ try {
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
         )"
     ];
-    
-    // Crear índices para mejorar performance
-    $indices = [
-        "CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)",
-        "CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)",
-        "CREATE INDEX IF NOT EXISTS idx_messages_sender ON messages(sender_id)",
-        "CREATE INDEX IF NOT EXISTS idx_messages_receiver ON messages(receiver_id)",
-        "CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at)",
-        "CREATE INDEX IF NOT EXISTS idx_friends_user ON friends(user_id)",
-        "CREATE INDEX IF NOT EXISTS idx_friends_friend ON friends(friend_id)",
-        "CREATE INDEX IF NOT EXISTS idx_friends_status ON friends(status)",
-        "CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_logs(user_id)",
-        "CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_logs(created_at)"
-    ];
-    
-    foreach($tables as $sql) {
-        $pdo->exec($sql);
-    }
-    
-    foreach($indices as $sql) {
-        $pdo->exec($sql);
-    }
-
-} catch(PDOException $e) {
-    if (PHP_SAPI === 'cli') {
-        echo "ERROR: No se pudo conectar a la base de datos.\n";
-    } else {
-        http_response_code(500);
-        header('Content-Type: application/json');
-        echo json_encode(['error' => 'Error de conexión a la base de datos']);
-    }
-    exit;
-}
-
-// Conexión a la base de datos SQLite (comentada)
-/* try {
-    $pdo = new PDO("sqlite:" . DB_PATH);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-    
-    // Habilitar foreign keys en SQLite
-    $pdo->exec("PRAGMA foreign_keys = ON");
-    
-    // Crear tablas si no existen
+} else {
     $tables = [
         "CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -129,6 +122,7 @@ try {
             phone TEXT NOT NULL,
             profile_pic TEXT DEFAULT 'default.png',
             is_active INTEGER DEFAULT 1,
+            profile_completed INTEGER DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )",
@@ -165,40 +159,59 @@ try {
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
         )"
     ];
-    
-    
-    // Crear índices para mejorar performance SQL1ite (comentada)
-    $indices = [
-        "CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)",
-        "CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)",
-        "CREATE INDEX IF NOT EXISTS idx_messages_sender ON messages(sender_id)",
-        "CREATE INDEX IF NOT EXISTS idx_messages_receiver ON messages(receiver_id)",
-        "CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at)",
-        "CREATE INDEX IF NOT EXISTS idx_friends_user ON friends(user_id)",
-        "CREATE INDEX IF NOT EXISTS idx_friends_friend ON friends(friend_id)",
-        "CREATE INDEX IF NOT EXISTS idx_friends_status ON friends(status)",
-        "CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_logs(user_id)",
-        "CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_logs(created_at)"
-    ]; 
-    
-    foreach($tables as $sql) {
-        $pdo->exec($sql);
-    }
-    
-    foreach($indices as $sql) {
-        $pdo->exec($sql);
-    }
-} catch(PDOException $e) {
-    if (PHP_SAPI === 'cli') {
-        echo "ERROR: No se pudo conectar a la base de datos.\n";
-    } else {
-        http_response_code(500);
-        header('Content-Type: application/json');
-        echo json_encode(['error' => 'Error de conexión a la base de datos']);
-    }
-    exit;
 }
-*/
+
+// Crear indices para mejorar performance
+$indices = [
+    "CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)",
+    "CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)",
+    "CREATE INDEX IF NOT EXISTS idx_messages_sender ON messages(sender_id)",
+    "CREATE INDEX IF NOT EXISTS idx_messages_receiver ON messages(receiver_id)",
+    "CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at)",
+    "CREATE INDEX IF NOT EXISTS idx_friends_user ON friends(user_id)",
+    "CREATE INDEX IF NOT EXISTS idx_friends_friend ON friends(friend_id)",
+    "CREATE INDEX IF NOT EXISTS idx_friends_status ON friends(status)",
+    "CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_logs(user_id)",
+    "CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_logs(created_at)"
+];
+
+foreach($tables as $sql) {
+    $pdo->exec($sql);
+}
+
+foreach($indices as $sql) {
+    $pdo->exec($sql);
+}
+
+if ($pdoDriver === 'sqlite') {
+    $columns = $pdo->query("PRAGMA table_info(users)")->fetchAll(PDO::FETCH_ASSOC);
+    $columnNames = array_map(function($col) { return $col['name']; }, $columns);
+
+    if (!in_array('is_active', $columnNames, true)) {
+        $pdo->exec("ALTER TABLE users ADD COLUMN is_active INTEGER DEFAULT 1");
+    }
+
+    if (!in_array('updated_at', $columnNames, true)) {
+        $pdo->exec("ALTER TABLE users ADD COLUMN updated_at TIMESTAMP");
+        $pdo->exec("UPDATE users SET updated_at = CURRENT_TIMESTAMP WHERE updated_at IS NULL");
+    }
+
+    if (!in_array('profile_completed', $columnNames, true)) {
+        $pdo->exec("ALTER TABLE users ADD COLUMN profile_completed INTEGER DEFAULT 1");
+        $pdo->exec("UPDATE users SET profile_completed = 1 WHERE profile_completed IS NULL");
+    }
+}
+
+if ($pdoDriver === 'mysql') {
+    $stmt = $pdo->prepare("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users'");
+    $stmt->execute();
+    $columnNames = array_map(function($col) { return $col['COLUMN_NAME']; }, $stmt->fetchAll(PDO::FETCH_ASSOC));
+
+    if (!in_array('profile_completed', $columnNames, true)) {
+        $pdo->exec("ALTER TABLE users ADD COLUMN profile_completed TINYINT(1) DEFAULT 1");
+        $pdo->exec("UPDATE users SET profile_completed = 1 WHERE profile_completed IS NULL");
+    }
+}
 // Función para registrar acciones
 function logAction($action, $details = null) {
     global $pdo;

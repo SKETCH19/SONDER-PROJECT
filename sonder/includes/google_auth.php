@@ -3,6 +3,11 @@ include 'includes/auth.php';
 
 header('Content-Type: application/json');
 
+if (!GOOGLE_AUTH_ENABLED) {
+    echo json_encode(['success' => false, 'message' => 'Google Sign-In deshabilitado']);
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'message' => 'Método no permitido']);
     exit;
@@ -38,7 +43,7 @@ try {
     }
 
     // Verificar que el client_id sea el correcto
-    if (!isset($payload['aud']) || $payload['aud'] !== '217692443393-3js9oadjainj1lbdcq8psp9ie0ss41fl.apps.googleusercontent.com') {
+    if (!isset($payload['aud']) || $payload['aud'] !== GOOGLE_CLIENT_ID) {
         throw new Exception('Client ID no válido');
     }
 
@@ -61,7 +66,7 @@ try {
     global $pdo;
 
     // Verificar si el usuario ya existe por email
-    $stmt = $pdo->prepare("SELECT id, username, is_active FROM users WHERE email = ?");
+    $stmt = $pdo->prepare("SELECT id, username, is_active, profile_completed FROM users WHERE email = ?");
     $stmt->execute([$email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -75,25 +80,15 @@ try {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
         $_SESSION['google_auth'] = true;
+        $_SESSION['profile_completed'] = (int)$user['profile_completed'];
         
         logAction('LOGIN_GOOGLE', 'Inicio de sesión con Google');
-        echo json_encode(['success' => true, 'message' => 'Autenticación exitosa']);
+        $redirect = ($user['profile_completed'] == 1) ? 'dashboard.php' : 'complete_profile.php';
+        echo json_encode(['success' => true, 'message' => 'Autenticación exitosa', 'redirect' => $redirect]);
     } else {
         // Crear nuevo usuario desde Google
         // Generar un username único basado en el email
-        $baseUsername = strtolower(explode('@', $email)[0]);
-        $username = $baseUsername;
-        $counter = 1;
-
-        while (true) {
-            $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
-            $stmt->execute([$username]);
-            if ($stmt->rowCount() === 0) {
-                break;
-            }
-            $username = $baseUsername . $counter;
-            $counter++;
-        }
+        $username = generateUniqueUsername('user');
 
         // Generar una contraseña aleatoria para Google Sign-In
         $randomPassword = bin2hex(random_bytes(16));
@@ -104,8 +99,8 @@ try {
 
         try {
             $stmt = $pdo->prepare("
-                INSERT INTO users (full_name, username, email, password, birth_date, country, phone, profile_pic, is_active)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
+                INSERT INTO users (full_name, username, email, password, birth_date, country, phone, profile_pic, is_active, profile_completed)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, 0)
             ");
 
             $result = $stmt->execute([
@@ -116,7 +111,7 @@ try {
                 $birthDate,
                 'No especificado',
                 '0000000000',
-                $picture ?? 'default.png'
+                'default.png'
             ]);
 
             if ($result) {
@@ -124,9 +119,10 @@ try {
                 $_SESSION['user_id'] = $userId;
                 $_SESSION['username'] = $username;
                 $_SESSION['google_auth'] = true;
+                $_SESSION['profile_completed'] = 0;
 
                 logAction('REGISTER_GOOGLE', 'Registro automático con Google');
-                echo json_encode(['success' => true, 'message' => 'Usuario creado y autenticado']);
+                echo json_encode(['success' => true, 'message' => 'Usuario creado y autenticado', 'redirect' => 'complete_profile.php']);
             } else {
                 throw new Exception('No se pudo crear el usuario');
             }

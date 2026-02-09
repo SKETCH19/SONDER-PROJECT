@@ -45,11 +45,11 @@ if (!isset($_FILES['avatar']) || $_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
 $user_id = $_SESSION['user_id'];
 $file = $_FILES['avatar'];
 
-// Validar tamaño (máximo 5MB)
-$max_size = 5 * 1024 * 1024; // 5MB
+// Validar tamaño (máximo 10MB)
+$max_size = 10 * 1024 * 1024; // 10MB
 if ($file['size'] > $max_size) {
     http_response_code(400);
-    echo json_encode(['error' => 'El archivo es demasiado grande (máximo 5MB)']);
+    echo json_encode(['error' => 'El archivo es demasiado grande (máximo 10MB)']);
     exit;
 }
 

@@ -6,6 +6,11 @@ if (!isLoggedIn()) {
     exit;
 }
 
+if (!isProfileComplete()) {
+    header('Location: complete_profile.php');
+    exit;
+}
+
 $userInfo = getUserInfo($_SESSION['user_id']);
 
 

@@ -6,6 +6,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'];
     
     if (loginUser($username, $password)) {
+        if (!isProfileComplete()) {
+            header('Location: complete_profile.php');
+            exit;
+        }
         header('Location: dashboard.php');
         exit;
     } else {
@@ -19,7 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google-signin-client_id" content="217692443393-3js9oadjainj1lbdcq8psp9ie0ss41fl.apps.googleusercontent.com">
+    <?php if (GOOGLE_AUTH_ENABLED): ?>
+    <meta name="google-signin-client_id" content="<?php echo htmlspecialchars(GOOGLE_CLIENT_ID, ENT_QUOTES, 'UTF-8'); ?>">
+    <?php endif; ?>
     <title>Iniciar Sesión - Sonder</title>
     <link rel="icon" href="logo.svg" type="image/svg+xml">
     <link rel="stylesheet" href="css/style.css">
@@ -54,21 +60,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit" class="btn btn-primary" style="width: 100%;">Iniciar Sesión</button>
         </form>
         
+        <?php if (GOOGLE_AUTH_ENABLED): ?>
         <div style="text-align: center; margin: 1.5rem 0;">
             <p style="opacity: 0.7; margin-bottom: 0.8rem;">O inicia sesión con</p>
             <div id="g_id_onload"
-                 data-client_id="217692443393-3js9oadjainj1lbdcq8psp9ie0ss41fl.apps.googleusercontent.com"
+                 data-client_id="<?php echo htmlspecialchars(GOOGLE_CLIENT_ID, ENT_QUOTES, 'UTF-8'); ?>"
                  data-callback="handleCredentialResponse">
             </div>
             <div class="g_id_signin" data-type="standard" data-size="large" data-theme="dark" data-text="signin" data-shape="rectangular" data-logo_alignment="left" style="display: flex; justify-content: center;"></div>
         </div>
+        <?php endif; ?>
         
         <p style="text-align: center;">
             ¿No tienes cuenta? <a href="register.php" style="color: var(--electric-blue);">Regístrate</a>
         </p>
     </div>
     
+    <?php if (GOOGLE_AUTH_ENABLED): ?>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <?php endif; ?>
     <script>
         function handleCredentialResponse(response) {
             // El token JWT de Google
@@ -85,8 +95,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Redirigir al dashboard
-                    window.location.href = 'dashboard.php';
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else {
+                        window.location.href = 'dashboard.php';
+                    }
                 } else {
                     // Mostrar error
                     alert(data.message || 'Error en la autenticación con Google');
@@ -100,14 +113,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Configurar Google Sign-In
         window.onload = function () {
-            google.accounts.id.initialize({
-                client_id: '217692443393-3js9oadjainj1lbdcq8psp9ie0ss41fl.apps.googleusercontent.com',
-                callback: handleCredentialResponse
-            });
-            google.accounts.id.renderButton(
-                document.querySelector('.g_id_signin'),
-                { theme: 'outline', size: 'large' }
-            );
+            if (typeof google !== 'undefined') {
+                google.accounts.id.initialize({
+                    client_id: '<?php echo htmlspecialchars(GOOGLE_CLIENT_ID, ENT_QUOTES, 'UTF-8'); ?>',
+                    callback: handleCredentialResponse
+                });
+                google.accounts.id.renderButton(
+                    document.querySelector('.g_id_signin'),
+                    { theme: 'outline', size: 'large' }
+                );
+            }
         };
     </script>
     <script src="js/script.js"></script>
