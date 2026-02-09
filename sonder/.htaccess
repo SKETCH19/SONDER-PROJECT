@@ -1,0 +1,70 @@
+# Habilitar mod_rewrite
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Redirigir acceso a directorios protegidos
+    RewriteRule ^\.env$ - [F,L]
+    RewriteRule ^\.git$ - [F,L]
+    RewriteRule ^\.htaccess$ - [F,L]
+    RewriteRule ^README\.md$ - [F,L]
+
+    # Permitir archivos y directorios reales
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Redirigir a index.php (si es necesario para routing avanzado)
+    # RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+# Seguridad: Deshabilitar listing de directorios
+<IfModule mod_autoindex.c>
+    Options -Indexes
+</IfModule>
+
+# Compresión GZIP
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript
+</IfModule>
+
+# Caché de navegador
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresDefault "access plus 2 days"
+</IfModule>
+
+# Headers de seguridad
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Proteger archivos sensibles
+<FilesMatch "\.(db|env|log|json)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# PHP Configuration
+<IfModule mod_php7.c>
+    php_flag display_errors off
+    php_flag log_errors on
+    php_value error_log ../logs/error.log
+    php_value max_upload_size 5M
+    php_value post_max_size 5M
+</IfModule>
+
+<IfModule mod_php8.c>
+    php_flag display_errors off
+    php_flag log_errors on
+    php_value error_log ../logs/error.log
+    php_value max_upload_size 5M
+    php_value post_max_size 5M
+</IfModule>
