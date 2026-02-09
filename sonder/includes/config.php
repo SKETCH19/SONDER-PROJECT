@@ -1,13 +1,14 @@
 <?php
 // Configuración de seguridad
-ini_set('display_errors', 0);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 // Configuración de la base de datos
 define('DB_PATH', __DIR__ . '/../sonder.db');
 define('MAX_LOGIN_ATTEMPTS', 5);
 define('LOGIN_ATTEMPT_WINDOW', 900); // 15 minutos
-define('MIN_AGE', 18);
+define('MIN_AGE', 18); 
 
 // Iniciar sesión con configuración segura
 if (session_status() === PHP_SESSION_NONE) {
@@ -18,9 +19,96 @@ if (session_status() === PHP_SESSION_NONE) {
     ]);
     session_start();
 }
-
-// Conexión a la base de datos
+//conexion a la base de datos MySQL
 try {
+    $pdo = new PDO("mysql:host=localhost;dbname=sonder_db;charset=utf8mb4", "root", "");
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+
+    $tables = [
+        "CREATE TABLE IF NOT EXISTS users (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            full_name TEXT NOT NULL,
+            username VARCHAR(255) UNIQUE NOT NULL,
+            email VARCHAR(255) UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            birth_date DATE NOT NULL,
+            country TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            profile_pic TEXT DEFAULT 'default.png',
+            is_active INT DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )",
+        "CREATE TABLE IF NOT EXISTS messages (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            sender_id INT NOT NULL,
+            receiver_id INT NOT NULL,
+            message LONGTEXT NOT NULL,
+            message_type TEXT DEFAULT 'text',
+            file_path TEXT,
+            is_read INT DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
+        )",
+        "CREATE TABLE IF NOT EXISTS friends (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            friend_id INT NOT NULL,
+            status TEXT DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (friend_id) REFERENCES users(id) ON DELETE CASCADE,
+            UNIQUE(user_id, friend_id)
+        )",
+        "CREATE TABLE IF NOT EXISTS audit_logs (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT,
+            action TEXT NOT NULL,
+            details TEXT,
+            ip_address TEXT,
+            user_agent TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+        )"
+    ];
+    
+    // Crear índices para mejorar performance
+    $indices = [
+        "CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)",
+        "CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)",
+        "CREATE INDEX IF NOT EXISTS idx_messages_sender ON messages(sender_id)",
+        "CREATE INDEX IF NOT EXISTS idx_messages_receiver ON messages(receiver_id)",
+        "CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at)",
+        "CREATE INDEX IF NOT EXISTS idx_friends_user ON friends(user_id)",
+        "CREATE INDEX IF NOT EXISTS idx_friends_friend ON friends(friend_id)",
+        "CREATE INDEX IF NOT EXISTS idx_friends_status ON friends(status)",
+        "CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_logs(user_id)",
+        "CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_logs(created_at)"
+    ];
+    
+    foreach($tables as $sql) {
+        $pdo->exec($sql);
+    }
+    
+    foreach($indices as $sql) {
+        $pdo->exec($sql);
+    }
+
+} catch(PDOException $e) {
+    if (PHP_SAPI === 'cli') {
+        echo "ERROR: No se pudo conectar a la base de datos.\n";
+    } else {
+        http_response_code(500);
+        header('Content-Type: application/json');
+        echo json_encode(['error' => 'Error de conexión a la base de datos']);
+    }
+    exit;
+}
+
+// Conexión a la base de datos SQLite (comentada)
+/* try {
     $pdo = new PDO("sqlite:" . DB_PATH);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
@@ -78,7 +166,8 @@ try {
         )"
     ];
     
-    // Crear índices para mejorar performance
+    
+    // Crear índices para mejorar performance SQL1ite (comentada)
     $indices = [
         "CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)",
         "CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)",
@@ -90,7 +179,7 @@ try {
         "CREATE INDEX IF NOT EXISTS idx_friends_status ON friends(status)",
         "CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_logs(user_id)",
         "CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_logs(created_at)"
-    ];
+    ]; 
     
     foreach($tables as $sql) {
         $pdo->exec($sql);
@@ -109,7 +198,7 @@ try {
     }
     exit;
 }
-
+*/
 // Función para registrar acciones
 function logAction($action, $details = null) {
     global $pdo;
