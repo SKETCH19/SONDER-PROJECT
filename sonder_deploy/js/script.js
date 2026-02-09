@@ -76,75 +76,79 @@ function setupImprovedSearch() {
             </div>
         `;
 
-        // Llamada real al endpoint de búsqueda
-        fetch('search_users.php?q=' + encodeURIComponent(searchQuery), { credentials: 'same-origin' })
-            .then(response => response.json())
-            .then(data => {
-                if (!data.success) {
-                    resultsContainer.innerHTML = '<div class="empty-state"><p>Error en la búsqueda</p></div>';
-                    return;
+        // Simular búsqueda con delay
+        setTimeout(() => {
+            // Resultados de ejemploS
+            const sampleUsers = [
+                {
+                    id: 1,
+                    name: "Alexandra Vega",
+                    username: "alexvega",
+                    bio: "Desarrolladora full-stack 💻 | Amante del espacio 🌌 | Fotografía astronómica",
+                    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
+                },
+                {
+                    id: 2,
+                    name: "Marco Rodríguez",
+                    username: "marcord",
+                    bio: "Diseñador UI/UX 🎨 | Música electrónica 🎵 | Viajero intergaláctico 🌠",
+                    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+                },
+                {
+                    id: 3,
+                    name: "Sofia Chen",
+                    username: "sofchen",
+                    bio: "Científica de datos 📊 | Escritora ✍️ | Exploradora de realidades alternas",
+                    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face"
                 }
+            ];
 
-                const users = data.results || [];
-
-                if (users.length === 0) {
-                    resultsContainer.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">◈</div>
-                            <h3>Sin resultados</h3>
-                            <p>No se encontraron usuarios para "${searchQuery}"</p>
+            let resultsHTML = '';
+            
+            sampleUsers.forEach(user => {
+                resultsHTML += `
+                    <div class="search-result-card" data-user-id="${user.id}">
+                        <img src="${user.avatar}" alt="${user.name}" class="search-result-avatar-improved">
+                        <div class="search-result-info-improved">
+                            <div class="search-result-name-improved">${user.name}</div>
+                            <div class="search-result-username-improved">@${user.username}</div>
+                            <div class="search-result-bio">${user.bio}</div>
                         </div>
-                    `;
-                    return;
-                }
-
-                let resultsHTML = '';
-                users.forEach(user => {
-                    resultsHTML += `
-                        <div class="search-result-card" data-user-id="${user.id}">
-                            <img src="${user.profile_pic_url || ('uploads/' + (user.profile_pic || 'default.png'))}" alt="${user.full_name}" class="search-result-avatar-improved" onerror="this.src='https://placehold.co/80'">
-                            <div class="search-result-info-improved">
-                                <div class="search-result-name-improved">${user.full_name}</div>
-                                <div class="search-result-username-improved">@${user.username}</div>
-                            </div>
-                            <div class="search-result-actions-improved">
-                                <button class="search-action-btn add-friend-btn"> <span>+</span> Agregar </button>
-                                <button class="search-action-btn view-profile-btn"> Ver </button>
-                            </div>
+                        <div class="search-result-actions-improved">
+                            <button class="search-action-btn add-friend-btn">
+                                <span>+</span> Agregar
+                            </button>
+                            <button class="search-action-btn view-profile-btn">
+                                Ver
+                            </button>
                         </div>
-                    `;
-                });
-
-                resultsHTML += `<div class="search-stats"><p>Mostrando ${users.length} resultados para "${searchQuery}"</p></div>`;
-                resultsContainer.innerHTML = resultsHTML;
-
-                // Agregar event listeners
-                document.querySelectorAll('.add-friend-btn').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        const userId = this.closest('.search-result-card').getAttribute('data-user-id');
-                        // Llamada AJAX real
-                        const form = new FormData();
-                        form.append('friend_id', userId);
-                        fetch('send_friend_request.php', { method: 'POST', body: form, credentials: 'same-origin' })
-                            .then(r => r.json())
-                            .then(res => {
-                                showNotification(res.message || (res.success ? 'Solicitud enviada' : 'Error'), res.success ? 'success' : 'info');
-                            })
-                            .catch(() => showNotification('Error al enviar solicitud', 'info'));
-                    });
-                });
-
-                document.querySelectorAll('.view-profile-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const userId = this.closest('.search-result-card').getAttribute('data-user-id');
-                        viewProfile(userId);
-                    });
-                });
-            })
-            .catch(err => {
-                resultsContainer.innerHTML = '<div class="empty-state"><p>Error en la búsqueda</p></div>';
-                console.error(err);
+                    </div>
+                `;
             });
+
+            resultsHTML += `
+                <div class="search-stats">
+                    <p>Mostrando ${sampleUsers.length} resultados para "${searchQuery}"</p>
+                </div>
+            `;
+
+            resultsContainer.innerHTML = resultsHTML;
+            
+            // Agregar event listeners a los botones después de crear el HTML
+            document.querySelectorAll('.add-friend-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.closest('.search-result-card').getAttribute('data-user-id');
+                    sendFriendRequest(userId);
+                });
+            });
+            
+            document.querySelectorAll('.view-profile-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.closest('.search-result-card').getAttribute('data-user-id');
+                    viewProfile(userId);
+                });
+            });
+        }, 1500);
     }
 
     // Event listeners
@@ -200,8 +204,7 @@ function sendFriendRequest(userId) {
 }
 
 function viewProfile(userId) {
-    // Redirigir a la vista pública del perfil
-    window.location.href = 'view_profile.php?user_id=' + encodeURIComponent(userId);
+    showNotification(`Perfil de usuario ${userId} - Funcionalidad en desarrollo`, 'info');
 }
 
 function showNotification(message, type = 'info') {
