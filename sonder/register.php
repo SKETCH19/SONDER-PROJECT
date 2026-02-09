@@ -138,13 +138,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit" class="btn btn-primary" style="width: 100%;">Registrarse</button>
         </form>
         
+        <div style="text-align: center; margin: 1.5rem 0;">
+            <p style="opacity: 0.7; margin-bottom: 0.8rem;">O regístrate con</p>
+            <div id="g_id_onload"
+                 data-client_id="217692443393-3js9oadjainj1lbdcq8psp9ie0ss41fl.apps.googleusercontent.com"
+                 data-callback="handleCredentialResponse">
+            </div>
+            <div class="g_id_signin" data-type="standard" data-size="large" data-theme="dark" data-text="signup" data-shape="rectangular" data-logo_alignment="left" style="display: flex; justify-content: center;"></div>
+        </div>
         <p style="text-align: center; margin-top: 1rem;">
             ¿Ya tienes cuenta? <a href="login.php" style="color: var(--electric-blue);">Inicia sesión</a>
         </p>
     </div>
     
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="js/script.js"></script>
     <script>
+        function handleCredentialResponse(response) {
+            // El token JWT de Google
+            const token = response.credential;
+            
+            // Enviar el token al servidor PHP
+            fetch('google_auth.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'token=' + encodeURIComponent(token)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Redirigir al dashboard
+                    window.location.href = 'dashboard.php';
+                } else {
+                    // Mostrar error
+                    alert(data.message || 'Error en la autenticación con Google');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error en la autenticación con Google');
+            });
+        }
+
+        // Configurar Google Sign-In
+        window.onload = function () {
+            google.accounts.id.initialize({
+                client_id: '217692443393-3js9oadjainj1lbdcq8psp9ie0ss41fl.apps.googleusercontent.com',
+                callback: handleCredentialResponse
+            });
+            google.accounts.id.renderButton(
+                document.querySelector('.g_id_signin'),
+                { theme: 'outline', size: 'large' }
+            );
+        
         // Lista completa de países del mundo
         const countriesList = [
             'Afganistán', 'Albania', 'Alemania', 'Andorra', 'Angola', 'Anguila', 'Antártida', 'Antigua y Barbuda',
@@ -237,36 +285,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     alert('Debes ser mayor de 18 años para registrarte en Sonder.');
                 }
             });
-        });
+        };
     </script>
 </body>
-</html>
-
-
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro - Sonder</title>
-    <link rel="icon" href="logo.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="css/style.css">
-    <style>
-        #country-select {
-            background-color: white !important;
-            color: #1a1a2e !important;
-        }
-        
-        #country-select option {
-            background-color: white;
-            color: #1a1a2e;
-            padding: 5px;
-        }
-        
-        #country-select option:hover {
-            background-color: var(--electric-blue);
-            color: white;
-        }
-    </style>
-</head>
 </html>

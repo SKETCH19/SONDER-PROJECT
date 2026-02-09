@@ -54,7 +54,8 @@ function registerUser($userData) {
     }
     
     // Hash de la contraseña
-    $hashedPassword = password_hash($userData['password'], PASSWORD_ARGON2ID);
+    //$hashedPassword = password_hash($userData['password'], PASSWORD_ARGON2ID);
+      $hashedPassword = password_hash($userData['password'], PASSWORD_BCRYPT);
     
     // Insertar usuario
     $stmt = $pdo->prepare("
@@ -165,4 +166,5 @@ function generateCSRFToken() {
 function validateCSRFToken($token) {
     return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
 }
+
 ?>
