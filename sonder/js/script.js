@@ -521,12 +521,14 @@ function setupFriendActions() {
 // Inicialización cuando el DOM está listo
 document.addEventListener('DOMContentLoaded', function() {
     // Menú toggle
-    const menuToggle = document.querySelector('.menu-toggle');
+    const menuToggles = document.querySelectorAll('.menu-toggle, .mobile-menu-toggle');
     const sidebar = document.querySelector('.sidebar');
     
-    if (menuToggle && sidebar) {
-        menuToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('open');
+    if (menuToggles.length > 0 && sidebar) {
+        menuToggles.forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                sidebar.classList.toggle('open');
+            });
         });
     }
     

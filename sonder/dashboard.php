@@ -83,6 +83,7 @@ $featured_contacts = getFeaturedContacts($_SESSION['user_id']);
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body data-current-user-id="<?php echo $_SESSION['user_id']; ?>">
+    <button class="mobile-menu-toggle" type="button" aria-label="Abrir menu">☰</button>
     <div class="dashboard">
         <!-- Menú lateral -->
         <div class="sidebar">
