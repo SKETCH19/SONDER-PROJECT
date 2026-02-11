@@ -1,4 +1,4 @@
-/* Variables de colores galácticos */
+/* Variables de colores galacticos */
 :root {
     --space-dark: #0a0a1a;
     --space-blue: #1a1a3a;
@@ -57,7 +57,7 @@ body {
     to { transform: translateY(-100px); }
 }
 
-/* Página de bienvenida */
+/* Pagina de bienvenida */
 .welcome-page {
     display: flex;
     justify-content: center;
@@ -366,7 +366,7 @@ body {
     background: var(--space-dark);
 }
 
-/* Menú lateral */
+/* Menu lateral */
 .sidebar {
     width: 300px;
     background: var(--space-blue);
@@ -492,7 +492,7 @@ body {
     color: var(--electric-blue);
 }
 
-/* Área de chat principal */
+/* Area de chat principal */
 .chat-area {
     flex: 1;
     display: flex;
@@ -500,7 +500,7 @@ body {
     width: 100%;
 }
 
-/* Áreas de contenido */
+/* Areas de contenido */
 .content-area {
     flex: 1;
     display: flex;
@@ -761,7 +761,7 @@ body {
     box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
 }
 
-/* ===== SECCIÓN DE BÚSQUEDA MEJORADA ===== */
+/* ===== SECCION DE BUSQUEDA MEJORADA ===== */
 .search-section {
     flex: 1;
     display: flex;
@@ -932,7 +932,7 @@ body {
     background: rgba(0, 212, 255, 0.1);
 }
 
-/* Estados de búsqueda */
+/* Estados de busqueda */
 .search-loading {
     text-align: center;
     padding: 3rem;
@@ -960,7 +960,7 @@ body {
     font-size: 0.9rem;
 }
 
-/* Sugerencias de búsqueda */
+/* Sugerencias de busqueda */
 .search-suggestions {
     display: flex;
     flex-wrap: wrap;
@@ -993,7 +993,7 @@ body {
     box-shadow: 0 4px 12px rgba(0, 212, 255, 0.2);
 }
 
-/* Responsive para búsqueda */
+/* Responsive para busqueda */
 @media (max-width: 768px) {
     .search-hero {
         padding: 2rem 1rem;
@@ -1079,7 +1079,7 @@ body {
     display: block;
 }
 
-/* Estados vacíos */
+/* Estados vacios */
 .empty-state {
     display: flex;
     flex-direction: column;
@@ -1404,7 +1404,6 @@ body {
     align-items: center;
     gap: 0.8rem;
     font-weight: 700;
-    /* text-transform: uppercase; */
     letter-spacing: 0.5px;
     position: relative;
     padding-bottom: 1rem;

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sonder - Demo Dashboard</title>
+    <link rel="icon" href="logo.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="dashboard">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="logo.svg" alt="Sonder" class="sonder-logo">
+                    <span class="sonder-text">Sonder</span>
+                </div>
+                <button class="menu-toggle" type="button">☰</button>
+            </div>
+            
+            <div class="sidebar-user">
+                <div class="user-info">
+                    <img src="https://placehold.co/45" alt="Avatar" class="user-avatar">
+                    <span class="username">demo_user</span>
+                </div>
+            </div>
+            
+            <div class="sidebar-menu">
+                <div class="menu-item active" data-section="messages">
+                    <span class="menu-icon">▬</span>
+                    <span>Mensajes</span>
+                </div>
+                <div class="menu-item" data-section="friends">
+                    <span class="menu-icon">◯</span>
+                    <span>Amigos</span>
+                    <span class="notification-badge">2</span>
+                </div>
+                <div class="menu-item" data-section="search">
+                    <span class="menu-icon">◍</span>
+                    <span>Buscar amigos</span>
+                </div>
+                <div class="menu-item" data-section="featured">
+                    <span class="menu-icon">★</span>
+                    <span>Destacados</span>
+                </div>
+                <div class="menu-item" data-section="profile">
+                    <span class="menu-icon">◆</span>
+                    <span>Perfil</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-area" id="messages-section">
+            <div class="chat-header">
+                <div class="chat-user">
+                    <img src="logo.svg" alt="Sonder" class="chat-user-avatar">
+                    <div class="chat-user-info">
+                        <h3>Bienvenido a Sonder</h3>
+                        <p>Demo estatica sin backend</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="messages-container">
+                <div class="welcome-message">
+                    <div class="welcome-logo"><img src="logo.svg" alt="Sonder"></div>
+                    <h3>Bienvenido a Sonder</h3>
+                    <p>Tu espacio para conexiones significativas</p>
+                    <p>Explora las secciones desde el menu</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-area" id="friends-section" style="display: none;">
+            <div class="section-header">
+                <h2>Mis amigos</h2>
+                <div class="section-tabs">
+                    <button class="tab-btn active" data-tab="friends-list" type="button">Amigos</button>
+                    <button class="tab-btn" data-tab="pending-requests" type="button">Solicitudes <span class="tab-badge">2</span></button>
+                    <button class="tab-btn" data-tab="blocked-users" type="button">Bloqueados</button>
+                </div>
+            </div>
+            
+            <div class="tab-content active" id="friends-list">
+                <div class="friends-list">
+                    <div class="friend-item">
+                        <img src="https://placehold.co/50" alt="Alex" class="friend-avatar">
+                        <div class="friend-info">
+                            <div class="friend-name">Alex Rivera</div>
+                            <div class="friend-username">@alexr</div>
+                        </div>
+                        <div class="friend-actions">
+                            <button class="friend-action" type="button">Chat</button>
+                            <button class="friend-action" type="button">Bloquear</button>
+                            <button class="friend-action" type="button">Eliminar</button>
+                        </div>
+                    </div>
+                    <div class="friend-item">
+                        <img src="https://placehold.co/50" alt="Camila" class="friend-avatar">
+                        <div class="friend-info">
+                            <div class="friend-name">Camila Soto</div>
+                            <div class="friend-username">@camis</div>
+                        </div>
+                        <div class="friend-actions">
+                            <button class="friend-action" type="button">Chat</button>
+                            <button class="friend-action" type="button">Bloquear</button>
+                            <button class="friend-action" type="button">Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="pending-requests">
+                <div class="requests-list">
+                    <div class="request-item">
+                        <img src="https://placehold.co/50" alt="Luna" class="request-avatar">
+                        <div class="request-info">
+                            <div class="friend-name">Luna Perez</div>
+                            <div class="request-username">@luna</div>
+                            <div class="request-time">Hace 2h</div>
+                        </div>
+                        <div class="request-actions">
+                            <button class="friend-action" type="button">Aceptar</button>
+                            <button class="friend-action" type="button">Rechazar</button>
+                        </div>
+                    </div>
+                    <div class="request-item">
+                        <img src="https://placehold.co/50" alt="Mateo" class="request-avatar">
+                        <div class="request-info">
+                            <div class="friend-name">Mateo Diaz</div>
+                            <div class="request-username">@mateo</div>
+                            <div class="request-time">Hace 1d</div>
+                        </div>
+                        <div class="request-actions">
+                            <button class="friend-action" type="button">Aceptar</button>
+                            <button class="friend-action" type="button">Rechazar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="blocked-users">
+                <div class="blocked-list">
+                    <div class="blocked-item">
+                        <img src="https://placehold.co/50" alt="User" class="blocked-avatar">
+                        <div class="blocked-info">
+                            <div class="friend-name">Usuario bloqueado</div>
+                            <div class="blocked-username">@blocked</div>
+                        </div>
+                        <div class="blocked-actions">
+                            <button class="friend-action" type="button">Desbloquear</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-area search-section" id="search-section" style="display: none;">
+            <div class="search-hero">
+                <h2>Encuentra nuevas conexiones</h2>
+                <p>Demo estatica para mostrar el diseno de busqueda</p>
+                <div class="search-container-improved">
+                    <input class="search-input-improved" type="text" placeholder="Buscar usuarios">
+                    <button class="search-btn-improved" type="button">Buscar</button>
+                </div>
+                <div class="search-suggestions">
+                    <div class="suggestion-tag">Diseno</div>
+                    <div class="suggestion-tag">Musica</div>
+                    <div class="suggestion-tag">Tecnologia</div>
+                </div>
+            </div>
+            <div class="search-results-improved">
+                <div class="search-result-card">
+                    <img src="https://placehold.co/80" alt="Sofia" class="search-result-avatar-improved">
+                    <div class="search-result-info-improved">
+                        <div class="search-result-name-improved">Sofia Lara</div>
+                        <div class="search-result-username-improved">@sofia</div>
+                        <div class="search-result-bio">Front-end developer y diseno UX.</div>
+                    </div>
+                    <div class="search-result-actions-improved">
+                        <button class="search-action-btn add-friend-btn" type="button">Agregar</button>
+                        <button class="search-action-btn view-profile-btn" type="button">Ver</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-area" id="featured-section" style="display: none;">
+            <div class="section-header">
+                <h2>Contactos destacados</h2>
+            </div>
+            <div class="featured-list">
+                <div class="featured-item">
+                    <div class="featured-badge">★</div>
+                    <img src="https://placehold.co/60" alt="Nora" class="featured-avatar">
+                    <div class="featured-info">
+                        <div class="friend-name">Nora Ruiz</div>
+                        <div class="featured-username">@nora</div>
+                    </div>
+                    <div class="featured-actions">
+                        <button class="featured-action" type="button">Chat</button>
+                        <button class="featured-action" type="button">Ver perfil</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-area" id="profile-section" style="display: none;">
+            <div class="section-header">
+                <h2>Perfil</h2>
+            </div>
+            <div style="padding: 1.5rem;">
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <img src="https://placehold.co/140" alt="Avatar" class="profile-large-avatar">
+                        <div class="profile-header-text">
+                            <h1>Demo User</h1>
+                            <p class="muted">@demo_user</p>
+                            <p class="profile-join">Miembro desde 2026</p>
+                        </div>
+                    </div>
+                    <div class="profile-meta">
+                        <div>
+                            <span class="profile-meta-label">Pais</span>
+                            <span class="profile-meta-value">Argentina</span>
+                        </div>
+                        <div>
+                            <span class="profile-meta-label">Correo</span>
+                            <span class="profile-meta-value">demo@sonder.app</span>
+                        </div>
+                        <div>
+                            <span class="profile-meta-label">Telefono</span>
+                            <span class="profile-meta-value">+54 11 0000 0000</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="js/demo.js"></script>
+</body>
+</html>

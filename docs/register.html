@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Sonder</title>
+    <link rel="icon" href="logo.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        #country-select {
+            background-color: white !important;
+            color: #1a1a2e !important;
+        }
+        #country-select option {
+            background-color: white;
+            color: #1a1a2e;
+            padding: 5px;
+        }
+        .form-help {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-top: 0.3rem;
+            display: block;
+        }
+        .field-error {
+            border-color: #ff6b6b !important;
+        }
+        .error-message {
+            color: #ff6b6b;
+            margin-bottom: 1rem;
+            text-align: center;
+            padding: 0.8rem;
+            background-color: rgba(255, 107, 107, 0.1);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="welcome-page">
+    <div class="stars"></div>
+    <div class="form-container">
+        <div class="form-logo-container">
+            <img src="logo.svg" alt="Sonder" class="form-logo">
+            <h1 class="form-title">Sonder</h1>
+        </div>
+        
+        <h2 style="text-align: center; color: var(--stardust); margin-bottom: 1.5rem; font-size: 1.2rem; opacity: 0.8;">Crear cuenta</h2>
+        <p style="text-align: center; opacity: 0.7; margin-bottom: 1rem;">Demo estatica. El backend no esta disponible en GitHub Pages.</p>
+        
+        <form id="register-form" data-demo-form novalidate>
+            <div class="form-group">
+                <label class="form-label">Nombre completo</label>
+                <input type="text" class="form-input" required minlength="3" maxlength="100">
+                <span class="form-help">Tu nombre completo (3-100 caracteres)</span>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Correo electronico</label>
+                <input type="email" class="form-input" required>
+                <span class="form-help">Debe ser un correo valido y unico</span>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Fecha de nacimiento</label>
+                <input type="date" id="birth_date" class="form-input" required>
+                <span class="form-help">Debes ser mayor de 18 anos</span>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Pais</label>
+                <select id="country-select" class="form-select" required>
+                    <option value="">Selecciona tu pais</option>
+                </select>
+                <span class="form-help">Selecciona el pais donde resides</span>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Numero de telefono</label>
+                <input type="tel" class="form-input" required pattern="[0-9\-\+\(\)\s]{7,20}">
+                <span class="form-help">Formato valido: +1-234-567-8900</span>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Contrasena</label>
+                <input type="password" class="form-input" required minlength="8">
+                <span class="form-help">Minimo 8 caracteres</span>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Registrarse</button>
+        </form>
+        
+        <p style="text-align: center; margin-top: 1rem;">
+            Ya tienes cuenta? <a href="login.html" style="color: var(--electric-blue);">Inicia sesion</a>
+        </p>
+        <p style="text-align: center; margin-top: 0.8rem;">
+            <a href="index.html" style="color: var(--electric-blue);">Volver al inicio</a>
+        </p>
+    </div>
+    <script src="js/countries.js"></script>
+    <script src="js/register-demo.js"></script>
+    <script src="js/demo.js"></script>
+</body>
+</html>
