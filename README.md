@@ -77,6 +77,19 @@ Al acceder a la aplicación por primera vez, se crearán automáticamente:
 - Las tablas necesarias (users, messages, friends, audit_logs)
 - Los índices para optimizar consultas
 
+## Publicar demo en GitHub Pages (estático)
+
+GitHub Pages no ejecuta PHP, así que esta opción publica una demo visual usando la carpeta `docs/`.
+
+1. Haz commit y push de los cambios (incluyendo `docs/`) en tu rama `develop`.
+2. En GitHub, ve a **Settings → Pages**.
+3. En **Source**, selecciona **Deploy from a branch**.
+4. Elige la rama `develop` y la carpeta `/docs`.
+5. Guarda y espera el deploy.
+
+Tu sitio quedará disponible en:
+https://sketch19.github.io/SONDER-PROJECT/
+
 ## Uso
 
 ### 1. Crear una cuenta
